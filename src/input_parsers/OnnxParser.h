@@ -36,6 +36,13 @@ public:
                        const Set<String> inputNames,
                        const Set<String> outputNames );
 
+    // Fuzzing helper //
+    friend void callParserForFuzzing( const uint8_t *Data, size_t Size );
+    OnnxParser( InputQueryBuilder &query,
+                const uint8_t *buffer,
+                size_t buffer_size,
+                const Set<String> inputNames,
+                const Set<String> terminalNames );
 
 private:
     // Settings //

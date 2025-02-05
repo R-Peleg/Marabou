@@ -6,7 +6,10 @@ target_include_directories(${MARABOU_LIB} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_sources(${MARABOU_TEST_LIB} PRIVATE ${SRCS})
 target_include_directories(${MARABOU_TEST_LIB} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
- 
+
+target_sources(${MARABOU_FUZZING} PRIVATE ${SRCS})
+target_include_directories(${MARABOU_FUZZING} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
 set (BASIS_FACTORIZATION_TESTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 macro(basis_factorization_add_unit_test name)
     set(USE_MOCK_COMMON TRUE)

@@ -22,6 +22,7 @@ option(RUN_PYTHON_TEST "Run Python API tests if building with Python" OFF)
 option(ENABLE_GUROBI "Enable use the Gurobi optimizer" OFF)
 option(ENABLE_OPENBLAS "Do symbolic bound tighting using blas" ON) # Not available on Windows
 option(CODE_COVERAGE "Add code coverage" OFF)  # Available only in debug mode
+option(FUZZING "Build fuzzing binary" OFF)  # Available only in debug mode
 
 ###################
 ## Git variables ##
@@ -472,6 +473,24 @@ if (${BUILD_PYTHON} AND ${RUN_PYTHON_TEST})
         POST_BUILD
         COMMAND ${PYTHON_EXECUTABLE} -m pytest ${PYTHON_API_DIR}/test
     )
+endif()
+
+set(MARABOU_FUZZING OnnxParserFuzzer)
+if (FUZZING)
+    if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        message(FATAL_ERROR "Only Clang is supported as the C++ compiler for fuzzing.")
+    endif()
+    add_compile_options(-g)
+    add_compile_options(-fsanitize=address,fuzzer)
+    add_compile_options(-fno-omit-frame-pointer)
+    add_compile_options(-Wno-unused-command-line-argument)
+    add_link_options(-fsanitize=address,fuzzer)
+    add_link_options(-fno-omit-frame-pointer)
+    add_executable(${MARABOU_FUZZING} "${SRC_DIR}/input_parsers/OnnxParserFuzz.cpp")
+    target_include_directories(${MARABOU_FUZZING} PRIVATE ${LIBS_INCLUDES})
+    target_link_libraries(${MARABOU_FUZZING} ${MARABOU_LIB})
+    target_link_libraries(${MARABOU_FUZZING} ${LIBS})
+    set(BUILD_SHARED_LIBS ON)
 endif()
 
 # Add the input parsers

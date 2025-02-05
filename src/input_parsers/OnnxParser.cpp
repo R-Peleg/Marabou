@@ -550,6 +550,46 @@ void OnnxParser::transferValues( String oldName, String newName )
 }
 
 /*******************
+ * Fuzzer target *
+ *******************/
+OnnxParser::OnnxParser( InputQueryBuilder &query,
+                        const uint8_t *buffer,
+                        size_t buffer_size,
+                        const Set<String> inputNames,
+                        const Set<String> terminalNames )
+    : _query( query )
+{
+    // parse protobuf
+    onnx::ModelProto model;
+    model.ParseFromArray( buffer, buffer_size );
+    _network = model.graph();
+
+    _numberOfFoundInputs = 0;
+
+
+    if ( inputNames.empty() )
+    {
+        _inputNames = readInputNames();
+    }
+    else
+    {
+        validateUserInputNames( inputNames );
+        _inputNames = inputNames;
+    }
+
+    if ( terminalNames.empty() )
+    {
+        _terminalNames = readOutputNames();
+    }
+    else
+    {
+        validateUserTerminalNames( terminalNames );
+        _terminalNames = terminalNames;
+    }
+}
+
+
+/*******************
  * Private methods *
  *******************/
 
