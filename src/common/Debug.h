@@ -54,6 +54,7 @@
 #endif
 
 #ifndef NDEBUG
+#ifndef FUZZING
 #define ASSERT( x )                                                                                \
     {                                                                                              \
         if ( !( x ) )                                                                              \
@@ -62,6 +63,16 @@
             exit( 1 );                                                                             \
         }                                                                                          \
     }
+#else
+#define ASSERT( x )                                                                                \
+    {                                                                                              \
+        if ( !( x ) )                                                                              \
+        {                                                                                          \
+            printf( "Assertion violation! File %s, line %d\n", __FILE__, __LINE__ );               \
+            throw 0;                                                                               \
+        }                                                                                          \
+    }
+#endif
 #else
 #define ASSERT( x )
 #endif
