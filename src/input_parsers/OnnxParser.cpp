@@ -417,6 +417,7 @@ Vector<double> getTensorFloatValues( const onnx::TensorProto &tensor, const Tens
     Vector<double> result;
     if ( raw_data.size() != 0 )
     {
+        ASSERT( raw_data.size() == size * sizeof( float ) );
         checkEndianness();
         const char *bytes = raw_data.c_str();
         const float *floats = reinterpret_cast<const float *>( bytes );
@@ -1174,7 +1175,7 @@ void OnnxParser::flatten( onnx::NodeProto &node )
     unsigned int axis = getIntAttribute( node, "axis", 1 );
 
     // Calculate output shape
-    TensorShape inputShape = _shapeMap[inputNodeName];
+    TensorShape inputShape = _shapeMap.at( inputNodeName );
     int dim1 = 1;
     for ( unsigned int i = 0; i < axis; i++ )
     {
@@ -1571,14 +1572,14 @@ void OnnxParser::convEquations( onnx::NodeProto &node, [[maybe_unused]] bool mak
     // Get input shape information
     // First input should be variable tensor
     String inputNodeName = node.input()[0];
-    TensorShape inputShape = _shapeMap[inputNodeName];
+    TensorShape inputShape = _shapeMap.at( inputNodeName );
     [[maybe_unused]] unsigned int inputChannels = inputShape[1];
     unsigned int inputWidth = inputShape[2];
     unsigned int inputHeight = inputShape[3];
 
     // Second input should be a weight matrix defining filters
     String filterNodeName = node.input()[1];
-    TensorShape filterShape = _shapeMap[filterNodeName];
+    TensorShape filterShape = _shapeMap.at( filterNodeName );
     unsigned int numberOfFilters = filterShape[0];
     unsigned int filterChannels = filterShape[1];
     unsigned int filterWidth = filterShape[2];
@@ -1682,7 +1683,7 @@ void OnnxParser::convEquations( onnx::NodeProto &node, [[maybe_unused]] bool mak
     if ( node.input().size() == 3 )
     {
         String biasName = node.input()[2];
-        biases = _constantFloatTensors[biasName];
+        biases = _constantFloatTensors.at( biasName );
     }
     else
     {
@@ -1785,8 +1786,8 @@ void OnnxParser::gemmEquations( onnx::NodeProto &node, bool makeEquations )
 
     // Assume that first input is variables, second is Matrix for MatMul, and third is bias addition
     Vector<Variable> inputVariables = _varMap[input1NodeName];
-    Vector<double> matrix = _constantFloatTensors[input2NodeName];
-    Vector<double> biases = _constantFloatTensors[biasNodeName];
+    Vector<double> matrix = _constantFloatTensors.at( input2NodeName );
+    Vector<double> biases = _constantFloatTensors.at( biasNodeName );
 
     // Transpose inputs
     if ( transA != 0 )
@@ -1965,7 +1966,7 @@ void OnnxParser::scaleAndAddEquations( onnx::NodeProto &node,
     TensorShape inputConstantsShape = input1IsConstant ? input1Shape : input2Shape;
     TensorShape inputVariablesShape = input1IsConstant ? input2Shape : input1Shape;
     Vector<double> inputConstants = _constantFloatTensors[constantName];
-    Vector<Variable> inputVariables = _varMap[variableName];
+    Vector<Variable> inputVariables = _varMap.at( variableName );
     double constantCoefficient = input1IsConstant ? coefficient1 : coefficient2;
     double variableCoefficient = input1IsConstant ? coefficient2 : coefficient1;
 
