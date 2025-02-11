@@ -1176,6 +1176,7 @@ void OnnxParser::flatten( onnx::NodeProto &node )
 
     // Calculate output shape
     TensorShape inputShape = _shapeMap.at( inputNodeName );
+    ASSERT( inputShape.size() >= axis );
     int dim1 = 1;
     for ( unsigned int i = 0; i < axis; i++ )
     {
@@ -1573,6 +1574,7 @@ void OnnxParser::convEquations( onnx::NodeProto &node, [[maybe_unused]] bool mak
     // First input should be variable tensor
     String inputNodeName = node.input()[0];
     TensorShape inputShape = _shapeMap.at( inputNodeName );
+    ASSERT( inputShape.size() >= 4 );
     [[maybe_unused]] unsigned int inputChannels = inputShape[1];
     unsigned int inputWidth = inputShape[2];
     unsigned int inputHeight = inputShape[3];
